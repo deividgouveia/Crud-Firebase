@@ -13,7 +13,7 @@ import Listagem from './src/Listagem';
 import { db, dbRef } from './src/firebaseConnection';
 import { child, get, ref, push, onValue } from 'firebase/database';
 
-interface IDados {
+export interface IDados {
   key: string | null
   nome: string
   idade: string

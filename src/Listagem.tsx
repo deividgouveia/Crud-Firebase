@@ -1,7 +1,8 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import { IDados } from '../App'
 
-export default function Listagem({data} : {data: any}) {
+export default function Listagem({data} : {data: IDados}) {
   return (
     <View>
       <Text>{data.nome}</Text>
