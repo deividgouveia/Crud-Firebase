@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import Listagem from './src/Listagem';
 import { db, dbRef } from './src/firebaseConnection';
-import { child, get, ref, push } from 'firebase/database';
+import { child, get, ref, push, onValue } from 'firebase/database';
 
 interface IDados {
   key: string | null
@@ -25,9 +25,32 @@ export default function App() {
   const [idade, setIdade] = useState('');
   const [usuarios, setUsuarios] = useState<IDados[]>([]);
 
-//---------------------Ler Dados-----------------------//
+//--------Ler dados e ver alterações em tempo real-----------
   useEffect(() => {
 
+    async function dados(){
+      const dadosReal = await ref(db, 'usuarios');
+      onValue(dadosReal, (snapshot) => {
+        if (snapshot.exists()) {
+          console.log(snapshot.val());
+          snapshot.forEach((chilItem) => {
+            let data = {
+              key: chilItem.key,
+              nome: chilItem.val().nome,
+              idade: chilItem.val().idade
+            };
+            setUsuarios(oldArray => [...oldArray, data])
+          })
+        } else {
+          console.log("No data available");
+        }
+      });
+    }
+
+    dados();
+
+//---------------Ler dados uma única vez---------------------    
+    /*
     async function dados(){
       await get(child(dbRef, `usuarios`)).then((snapshot) => {
         if (snapshot.exists()) {
@@ -48,7 +71,8 @@ export default function App() {
       });
     }
 
-    dados();
+    dados();  
+    */
  
   },[])
   
@@ -125,7 +149,7 @@ export default function App() {
 
       <View>
         <FlatList
-        keyExtractor={(item: IDados) => item.key}
+        keyExtractor={(item, index) => index.toString()}
         data={usuarios} 
         renderItem={ ({item}) => ( <Listagem data={item}/> ) }
         />
