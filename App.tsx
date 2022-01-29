@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
-import Login from './src/components/Login';
+import Login from './src/components/login';
 
 export default function App() {
 
