@@ -1,4 +1,5 @@
-export interface ILogin{
+export interface IUser{
+  uid: string
   email: string
-  senha: string
+  password: string
 }

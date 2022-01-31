@@ -4,22 +4,67 @@ import {
   SafeAreaView, 
   StyleSheet, 
   Text, 
-  TextInput, 
   TouchableOpacity, 
   View 
 } from 'react-native';
 
+console.disableYellowBox=true;
+
+import { app, db, dbRef } from '../../firebaseConnection';
+import { 
+  getAuth, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
+} from 'firebase/auth';
+
 import { Input, Icon, Button } from 'react-native-elements';
 
-import { ILogin } from '../../Interfaces';
-
-export default function Login() {
+export default function Login({changeStatus} : {changeStatus(user:string):void}) {
  
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");  
+  const [password, setPassword] = useState(""); 
+  const [loading, setLoading] = useState(false);
+  const [type, setType] = useState('login');
 
-  function handleLogin(){
-    Alert.alert("Error","Preencha os dados")
+  const auth = getAuth(app);
+
+  function handleButton(){
+
+    if(email == "" || password == ""){
+      Alert.alert("Error","Preencha os dados")
+    }else{
+      if(type === 'login'){
+      //Aqui fazemos o login
+
+        const user = signInWithEmailAndPassword(auth, email, password)
+        .then((user) => {
+          changeStatus(user.user.uid)
+        })
+        .catch((error) => {
+          console.log(error);
+          Alert.alert("Error","Ops deu um erro.");
+          setLoading(false);
+          return;
+        })  
+
+        setLoading(true)
+      }else{
+      //Aqui cadastramos o usuario 
+      
+        const user = createUserWithEmailAndPassword(auth, email, password)
+        .then((user) => {
+          changeStatus(user.user.uid)
+        })
+        .catch((error) => {
+          console.log(error);
+          Alert.alert("Error","Ops algo está errado!");
+          setLoading(false);
+        })
+
+        setLoading(true)
+      }
+      
+    }
   }    
 
   return (
@@ -37,7 +82,6 @@ export default function Login() {
         <View style={styles.inputArea}>
             <Input 
             placeholder="Digite seu e-mail"
-            style={styles.input}
             value={email}
             onChangeText={(text) => setEmail(text)} 
             leftIcon={{
@@ -49,7 +93,6 @@ export default function Login() {
 
             <Input 
             placeholder="Digite sua senha"
-            style={styles.input}
             value={password}
             onChangeText={(text) => setPassword(text)}
             leftIcon={{
@@ -61,18 +104,32 @@ export default function Login() {
             />
 
             <Button 
-              title='Acessar'
-              titleStyle={{fontWeight: 'bold', fontSize: 20}}
-              loading={false}
-              buttonStyle={styles.botton}
-              onPress={handleLogin}
+              title={type === 'login' ? 'Acessar' : 'Cadastrar'}
+              titleStyle={{
+                fontWeight: 'bold',
+                fontSize: 20,
+                color: type === 'login' ? '#fff' : '#000'
+              }}
+              loading={loading}
+              loadingProps={{
+                size:25,
+                color: type === 'login' ? '#fff' : '#000'
+              }}
+              buttonStyle={[styles.botton, {
+                backgroundColor: type === 'login' ? '#000' : '#fff',
+                borderColor: type === 'login' ? '#000' : '#000',
+                borderWidth: type === 'login' ? 2 : 2
+              }]}
+              onPress={handleButton}
             />
         </View>
       
-      
-
-      <TouchableOpacity>
-        <Text style={{fontWeight: 'bold', fontSize: 15}}>Criar uma conta</Text>
+      <TouchableOpacity 
+      onPress={ () => setType(type => type === 'login' ? 'cadastrar' : 'login')}
+      >
+        <Text style={{fontWeight: 'bold', fontSize: 15,color: '#000'}}>
+          {type === 'login' ? 'Criar uma conta' : 'Já sou cadastrado'}
+        </Text>
       </TouchableOpacity>
 
     </SafeAreaView>
@@ -90,16 +147,9 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 40
   },
-  input:{
-    backgroundColor: '#ffffff',
-    borderRadius: 0,
-    borderColor: "#000",
-    borderWidth: 0
-  },
   botton:{
     borderRadius: 20,
     padding: 10,
-    backgroundColor: '#000',
     marginTop: 15,
   },
   
