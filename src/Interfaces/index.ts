@@ -1,5 +1,3 @@
-export interface IUser{
-  uid: string
-  email: string
-  password: string
+export interface IDados{
+  nome: string
 }

@@ -10,7 +10,7 @@ import {
 
 console.disableYellowBox=true;
 
-import { app, db, dbRef } from '../../firebaseConnection';
+import { app } from '../../firebaseConnection';
 import { 
   getAuth, 
   signInWithEmailAndPassword,
@@ -42,7 +42,7 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
         })
         .catch((error) => {
           console.log(error);
-          Alert.alert("Error","Ops deu um erro.");
+          Alert.alert("Error","Usuário ou senha incorretos.");
           setLoading(false);
           return;
         })  
