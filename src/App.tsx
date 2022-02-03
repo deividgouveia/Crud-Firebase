@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   Alert,
   FlatList,
@@ -11,22 +11,25 @@ import {
   View 
 } from 'react-native';
 import { Icon } from 'react-native-elements';
-import { IDados } from './src/Interfaces';
+import { IDados } from './Interfaces';
 
-import Login from './src/components/login';
-import TaskList from './src/components/TaskList';
+import Login from './components/login';
+import TaskList from './components/TaskList';
 
-import { db, dbRef } from './src/firebaseConnection';
-import { push, ref, onValue} from 'firebase/database';
+import { db, dbRef } from './firebaseConnection';
+import { push, ref, onValue, remove, child, update, get} from 'firebase/database';
 
 export default function App() {
 
   const [user, setUser] = useState<string>('');
   const [tasks, setTasks] = useState<IDados[]>([]);
   const [newTask, setNewTask] = useState('');
+  const [key, setKey] = useState('');
+
+  const inputRef = useRef<TextInput | null>(null);
 
   useEffect(() => {
-     
+  //Visualizando as tarefas
     async function getUser() {
 
       if(!user){
@@ -61,31 +64,34 @@ export default function App() {
       Alert.alert("Alerta","Digite uma tarefa")
       return;
     }else{
-    let tarefas = await push(ref(db, 'tarefas/' + user), {
+    await push(ref(db, 'tarefas/' + user), {
       nome: newTask
     })
-    let chave = tarefas.key;
-    Alert.alert("Sucesso","Tarefa criada com sucesso!")
+    .then(() => {
+      Alert.alert("Sucesso!","Tarefa criada com sucesso!")
+    })
+    .catch((error) => {
+      Alert.alert("Error","Não salvou")
+    })
             
-    const data = {
-      key: chave,
-      nome: newTask
-    }; 
-    
-    setTasks(oldArray => [...oldArray, data])
-    
+  
     setNewTask('')
     Keyboard.dismiss();
   }
 }
 
-  function handleDelete(){
-    Alert.alert("Alerta","Delete")
+  async function handleDelete(data:IDados){
+  //Excluir tarefas
+  await remove(child(ref(db), 'tarefas/' + user + '/' + data.key));    
+  
+  const findTasks = tasks.filter( item => item.key != data.key)
+  setTasks(findTasks)
+  
   }
 
   function handleEdit(data:IDados){
-    console.log('Tarefa', data)
-    Alert.alert("Alerta","Edit")
+    setNewTask(data.nome)
+    inputRef.current?.focus();
   }
 
   if(!user){
@@ -105,6 +111,7 @@ export default function App() {
          placeholder='Digite a tarefa de hoje'
          value={newTask}
          onChangeText={ (text) => setNewTask(text)}
+         ref={inputRef}
         />
         <TouchableOpacity onPress={handleAdd}>
           <Icon

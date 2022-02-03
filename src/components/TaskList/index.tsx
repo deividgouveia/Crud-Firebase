@@ -35,8 +35,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     alignItems: 'center',
     marginBottom: 10,
-    padding: 10,
-    borderRadius: 4,
+    padding: 12,
+    borderRadius: 20,
     justifyContent: 'space-between'
   },
   text:{

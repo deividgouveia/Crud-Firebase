@@ -24,7 +24,9 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); 
   const [loading, setLoading] = useState(false);
+  const [eye, setEye] = useState(true);
   const [type, setType] = useState('login');
+
 
   const auth = getAuth(app);
 
@@ -98,8 +100,16 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
             leftIcon={{
               type:'feather',
               name:'lock'
-            }}
-            secureTextEntry={true} 
+            }}     
+            rightIcon={
+              <Icon 
+               name={eye === true ? 'eye' : 'eye-off'}
+               type='feather'
+               onPress={ () => setEye(eye => eye === true ? false : true)}
+               tvParallaxProperties={undefined}               
+              />
+            }
+            secureTextEntry={eye} 
             autoCompleteType={undefined}            
             />
 
