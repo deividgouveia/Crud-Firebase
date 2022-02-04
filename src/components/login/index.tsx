@@ -26,14 +26,16 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
   const [loading, setLoading] = useState(false);
   const [eye, setEye] = useState(true);
   const [type, setType] = useState('login');
-
+  const [inputvazio, setInputvazio] = useState(false);
+  const [titleError, setTitleError] = useState(false);
 
   const auth = getAuth(app);
 
   function handleButton(){
 
     if(email == "" || password == ""){
-      Alert.alert("Error","Preencha os dados")
+      setInputvazio(true)
+      setTitleError(false)
     }else{
       if(type === 'login'){
       //Aqui fazemos o login
@@ -44,11 +46,12 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
         })
         .catch((error) => {
           console.log(error);
-          Alert.alert("Error","Usuário ou senha incorretos.");
+          //Alert.alert("Error","Usuário ou senha incorretos.");
+          setInputvazio(true);
+          setTitleError(true);
           setLoading(false);
           return;
         })  
-
         setLoading(true)
       }else{
       //Aqui cadastramos o usuario 
@@ -67,7 +70,38 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
       }
       
     }
-  }    
+  }  
+
+  function handleTextEmail(text:string){
+     setEmail(text);
+     setInputvazio(false);
+  }
+  function handleTextPassword(text:string){
+    setPassword(text);
+    setInputvazio(false);
+  }
+  
+  const Dadosvazio = () => {
+     return(
+      <View style={{
+        flexDirection:'row', 
+        justifyContent:'center',
+        marginBottom: 10
+        }}>
+        <Icon
+          name='alert-circle'
+          type='feather'
+          color='#ff0000'
+          size={20} 
+          tvParallaxProperties={undefined}               
+        />
+        <Text style={{fontSize:15, color:'#ff0000', marginLeft:5}}>
+          {titleError === false ? 'Preencha os dados.' : 'Usuário ou senha incorretos.'}
+          
+          </Text>
+        </View>
+     );
+  }
 
   return (
     
@@ -80,12 +114,12 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
         size={80}
         tvParallaxProperties={undefined}       
       />
-
+      
         <View style={styles.inputArea}>
             <Input 
             placeholder="Digite seu e-mail"
             value={email}
-            onChangeText={(text) => setEmail(text)} 
+            onChangeText={handleTextEmail} 
             leftIcon={{
               type:'feather',
               name:'mail'
@@ -96,14 +130,14 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
             <Input 
             placeholder="Digite sua senha"
             value={password}
-            onChangeText={(text) => setPassword(text)}
+            onChangeText={handleTextPassword}
             leftIcon={{
               type:'feather',
               name:'lock'
             }}     
             rightIcon={
               <Icon 
-               name={eye === true ? 'eye' : 'eye-off'}
+               name={eye === true ? 'eye-off' : 'eye'}
                type='feather'
                onPress={ () => setEye(eye => eye === true ? false : true)}
                tvParallaxProperties={undefined}               
@@ -112,6 +146,8 @@ export default function Login({changeStatus} : {changeStatus(user:string):void})
             secureTextEntry={eye} 
             autoCompleteType={undefined}            
             />
+          
+            {inputvazio === false ? null : <Dadosvazio/>}
 
             <Button 
               title={type === 'login' ? 'Acessar' : 'Cadastrar'}

@@ -63,21 +63,36 @@ export default function App() {
     if(newTask === ''){
       Alert.alert("Alerta","Digite uma tarefa")
       return;
-    }else{
+    }
+
+    //Usuario quer editar uma tarefa
+    if(key !== ''){
+      update(ref(db, 'tarefas/' + user + '/' + key), {
+        nome: newTask
+      })
+      .then(() => {
+        console.log("Tarefa atualizada com sucesso!")
+      })
+      
+      Keyboard.dismiss();
+      setNewTask('');
+      setKey('');
+      return;
+    }
+    
     await push(ref(db, 'tarefas/' + user), {
       nome: newTask
     })
     .then(() => {
       Alert.alert("Sucesso!","Tarefa criada com sucesso!")
     })
-    .catch((error) => {
+    .catch(() => {
       Alert.alert("Error","Não salvou")
     })
-            
-  
+        
     setNewTask('')
     Keyboard.dismiss();
-  }
+  
 }
 
   async function handleDelete(data:IDados){
@@ -90,8 +105,17 @@ export default function App() {
   }
 
   function handleEdit(data:IDados){
+    if(data?.key){
+      setKey(data.key)
+    }
     setNewTask(data.nome)
     inputRef.current?.focus();
+  }
+
+  function cancelEdit(){
+    setKey('');
+    setNewTask('');
+    Keyboard.dismiss();
   }
 
   if(!user){
@@ -100,10 +124,29 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      
-      <View style={{alignItems:'center'}}>
+
+      <View style={{alignItems:'center', backgroundColor:'#fff'}}>
         <Text style={styles.title}>Minhas Tarefas</Text>
       </View>
+
+      {key.length > 0 && (
+        <TouchableOpacity onPress={cancelEdit} style={{alignItems:'center'}}>
+         <View style={styles.cancelEdit}>
+          <Icon
+            name='x-circle'
+            type='feather'
+            color='#fff' 
+            size={15}
+            style={{marginLeft: 5, marginTop: 1.5 }}
+            tvParallaxProperties={undefined}          
+          />
+        
+         <Text style={{color:'#fff', marginLeft: 5}}>
+          Você está editando uma tarefa!
+         </Text>
+       </View>
+      </TouchableOpacity>
+      )}
           
       <View style={styles.containerTask}>
         <TextInput
@@ -115,9 +158,10 @@ export default function App() {
         />
         <TouchableOpacity onPress={handleAdd}>
           <Icon
-            name='plus-circle'
+            name={key !== '' ? 'check-circle' : 'plus-circle'}
             type='feather'
             size={40}
+            color={key !== '' ? '#008000' : '#000'}
             style={{marginTop: 5, paddingLeft: 5}} 
             tvParallaxProperties={undefined}          
           />
@@ -160,4 +204,11 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 20
   },
+  cancelEdit:{
+    flexDirection: 'row',
+    backgroundColor: '#ff0000',
+    marginBottom: 5,
+    width: '62%',
+    borderRadius: 8
+  }
 });
